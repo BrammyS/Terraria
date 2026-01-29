@@ -29,6 +29,24 @@ ENV SERVER_PATH=/terraria-server
 ENV CONFIG_PATH=${SERVER_PATH}/configs
 ENV WORLD_PATH=${SERVER_PATH}/worlds
 
+# Terraria CLI environment variables
+ENV TERRARIA_CONFIG=${CONFIG_PATH}/serverconfig.txt
+ENV TERRARIA_PORT=
+ENV TERRARIA_MAXPLAYERS=
+ENV TERRARIA_MOTD=
+ENV TERRARIA_WORLD=
+ENV TERRARIA_AUTOCREATE=
+ENV TERRARIA_BANLIST=
+ENV TERRARIA_WORLDNAME=
+ENV TERRARIA_SECURE=
+ENV TERRARIA_NOUPNP=
+ENV TERRARIA_IP=
+ENV TERRARIA_FORCEPRIORITY=
+ENV TERRARIA_DISABLEANNOUNCEMENTBOX=
+ENV TERRARIA_ANNOUNCEMENTBOXRANGE=
+ENV TERRARIA_SEED=
+ENV TERRARIA_EXTRA_ARGS=
+
 # Expose volumes and ports
 VOLUME ["${WORLD_PATH}", "${CONFIG_PATH}"]
 EXPOSE 7777/udp
@@ -40,16 +58,19 @@ LABEL org.opencontainers.image.url="https://github.com/BrammyS/Terraria"
 LABEL org.opencontainers.image.licenses=MIT
 LABEL org.opencontainers.image.description="Vanilla Terraria v${VERSION} Server"
 
-# Install mono-runtime when building for non-amd64 architectures
-RUN if not [ "${TARGETARCH}" = "amd64" ] ]; then \
-        apt-get update && apt-get install -y ca-certificates mono-runtime && rm -rf /var/lib/apt/lists/*; \
-        # The provided system.dll form terraria doesn't match the mono version.
-        mv /terraria-server/System.dll /usr/lib/mono/4.5/System.dll; \
-    fi
-
 # Copy the downloaded server files from build stage
 COPY --from=build /${SERVER_PATH} /${SERVER_PATH}
 
+# Install mono-runtime when building for non-amd64 architectures
+RUN if [ "${TARGETARCH}" != "amd64" ]; then \
+        apt-get update && apt-get install -y ca-certificates mono-runtime && rm -rf /var/lib/apt/lists/*; \
+        # The provided System.dll from Terraria doesn't match the mono version.
+        mv "${SERVER_PATH}/System.dll" /usr/lib/mono/4.5/System.dll; \
+    fi
+
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 # Set working directory and entrypoint
 WORKDIR ${SERVER_PATH}
-ENTRYPOINT [ "/bin/sh", "-c", "if [ \"${TARGETARCH}\" = \"amd64\" ]; then ./TerrariaServer; else mono ./TerrariaServer.exe; fi" ]
+ENTRYPOINT [ "/entrypoint.sh" ]
