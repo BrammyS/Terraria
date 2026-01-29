@@ -1,6 +1,6 @@
 # Terraria Server
 
-This image runs the official **Vanilla Terraria** dedicated server inside a container. The image is built for multiple architectures (amd64, arm64, arm) and is fully configurable via environment variables.
+This image runs the official **Vanilla Terraria** dedicated server inside a container. The image is built for multiple architectures (amd64 and arm64) and is fully configurable via environment variables.
 
 ## Available tags
 
