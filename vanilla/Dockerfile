@@ -10,12 +10,14 @@ ADD https://terraria.org/api/download/pc-dedicated-server/terraria-server-${VERS
 RUN apt-get update && apt-get install -y unzip && rm -rf /var/lib/apt/lists/*
 
 # Extract server files
+ENV TEMP_PATH=/temp
 RUN set -eux; \
-    unzip "${SERVER_PATH}.zip" -d "${SERVER_PATH}"; \
+    mkdir -p "${TEMP_PATH}/${SERVER_PATH}"; \
+    unzip "${SERVER_PATH}.zip" -d "${TEMP_PATH}/${SERVER_PATH}"; \
     mkdir -p "/${SERVER_PATH}"; \
     mkdir -p "/configs"; \
-    mv "${SERVER_PATH}/${VERSION}/Linux/"* "/${SERVER_PATH}/"; \
-    mv "${SERVER_PATH}/${VERSION}/Windows/serverconfig.txt" "/configs/serverconfig.txt"; \
+    mv "${TEMP_PATH}/${SERVER_PATH}/${VERSION}/Linux/"* "/${SERVER_PATH}/"; \
+    mv "${TEMP_PATH}/${SERVER_PATH}/${VERSION}/Windows/serverconfig.txt" "/configs/serverconfig.txt"; \
     chmod +x "${SERVER_PATH}/TerrariaServer"*
 
 # Runtime stage
