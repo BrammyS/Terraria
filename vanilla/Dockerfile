@@ -58,7 +58,7 @@ LABEL org.opencontainers.image.licenses=MIT
 LABEL org.opencontainers.image.description="Vanilla Terraria v${VERSION} Server"
 
 # Copy the downloaded server files from build stage
-COPY --from=build /${SERVER_PATH} /${SERVER_PATH}
+COPY --from=build ${SERVER_PATH} ${SERVER_PATH}
 
 # Install mono-runtime when building for non-amd64 architectures
 RUN if [ "${TARGETARCH}" != "amd64" ]; then \
@@ -68,8 +68,13 @@ RUN if [ "${TARGETARCH}" != "amd64" ]; then \
     fi
 
 # Create symlinks for world paths
-RUN mkdir -p "/worlds"
-RUN ln -sT /${WORLD_PATH} /root/.local/share/Terraria/Worlds
+ENV DEFAULT_TERRARIA_WORLD_DIR=/root/.local/share/Terraria/Worlds
+RUN set -eux; \
+    mkdir -p "${WORLD_PATH}"; \
+    mkdir -p "${DEFAULT_TERRARIA_WORLD_DIR}"; \
+    rm -rf "${DEFAULT_TERRARIA_WORLD_DIR}"; \
+    ln -sT "${WORLD_PATH}" "${DEFAULT_TERRARIA_WORLD_DIR}"
+
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
