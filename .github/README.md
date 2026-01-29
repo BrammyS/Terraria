@@ -14,25 +14,25 @@ The tags following pattern is used:
 
 All of the following environment variables are supported by the image entrypoint (they map directly to Terraria server CLI flags).
 
-| Category | Environment variable | Default | Terraria CLI flag | Notes |
-|---|---|---|---|---|
-| Config | `TERRARIA_CONFIG` | `/terraria-server/configs/serverconfig.txt` | `-config <path>` | Config file path |
-| Network | `TERRARIA_PORT` |  | `-port <port>` | Publish the same port on TCP and UDP |
-| Network | `TERRARIA_IP` |  | `-ip <ip>` | Bind IP address |
-| Access | `TERRARIA_PASSWORD` |  | `-password <password>` | Server password (masked in logs) |
-| Access | `TERRARIA_SECURE` | `0` | `-secure` | Enable by setting to `1` |
-| Network | `TERRARIA_NOUPNP` | `0` | `-noupnp` | Disable UPnP by setting to `1` |
-| Server | `TERRARIA_MAXPLAYERS` |  | `-maxplayers <number>` |  |
-| Server | `TERRARIA_MOTD` |  | `-motd <text>` |  |
-| Server | `TERRARIA_FORCEPRIORITY` |  | `-forcepriority <value>` |  |
-| World | `TERRARIA_WORLD` |  | `-world <path>` | World file path |
-| World | `TERRARIA_WORLDNAME` |  | `-worldname <name>` | Used when creating a new world |
-| World | `TERRARIA_AUTOCREATE` |  | `-autocreate <size>` | `1`=small, `2`=medium, `3`=large |
-| World | `TERRARIA_SEED` |  | `-seed <seed>` | Used when creating a new world |
-| Moderation | `TERRARIA_BANLIST` |  | `-banlist <path>` |  |
-| UI | `TERRARIA_DISABLEANNOUNCEMENTBOX` | `0` | `-disableannouncementbox` | Enable by setting to `1` |
-| UI | `TERRARIA_ANNOUNCEMENTBOXRANGE` |  | `-announcementboxrange <number>` |  |
-| Advanced | `TERRARIA_EXTRA_ARGS` |  | (appended) | Appended verbatim to the server command |
+| Environment variable | Default | Notes |
+|---|---|---|
+| `TERRARIA_CONFIG` | `/terraria-server/configs/serverconfig.txt` | Config file path |
+| `TERRARIA_PORT` |  | Publish the same port on TCP and UDP |
+| `TERRARIA_IP` |  | Bind IP address |
+| `TERRARIA_PASSWORD` |  | Server password (masked in logs) |
+| `TERRARIA_SECURE` | `0` | Enable by setting to `1` |
+| `TERRARIA_NOUPNP` | `0` | Disable UPnP by setting to `1` |
+| `TERRARIA_MAXPLAYERS` |  |  |
+| `TERRARIA_MOTD` |  |  |
+| `TERRARIA_FORCEPRIORITY` |  |  |
+| `TERRARIA_WORLD` |  | World file path |
+| `TERRARIA_WORLDNAME` |  | Used when creating a new world |
+| `TERRARIA_AUTOCREATE` |  | `1`=small, `2`=medium, `3`=large |
+| `TERRARIA_SEED` |  | Used when creating a new world |
+| `TERRARIA_BANLIST` |  |  |
+| `TERRARIA_DISABLEANNOUNCEMENTBOX` | `0` | Enable by setting to `1` |
+| `TERRARIA_ANNOUNCEMENTBOXRANGE` |  |  |
+| `TERRARIA_EXTRA_ARGS` |  | Appended verbatim to the server command |
 
 ## Volumes
 
@@ -105,7 +105,6 @@ services:
       # TERRARIA_PASSWORD: "changeme"
       # TERRARIA_SECURE: "1"
       # TERRARIA_NOUPNP: "1"
-      # TERRARIA_EXTRA_ARGS: "-logfile /terraria-server/configs/server.log"
     volumes:
       - terraria_worlds:/terraria-server/worlds
       - terraria_configs:/terraria-server/configs
