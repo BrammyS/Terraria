@@ -70,8 +70,8 @@ jobs:
         with:
           push: true
           platforms: linux/amd64,linux/arm64
-          context: .
-          file: ./Dockerfile
+          context: ./vanilla
+          file: ./vanilla/Dockerfile
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
