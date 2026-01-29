@@ -64,8 +64,11 @@ COPY --from=build /${SERVER_PATH} /${SERVER_PATH}
 # Install mono-runtime when building for non-amd64 architectures
 RUN if [ "${TARGETARCH}" != "amd64" ]; then \
         apt-get update && apt-get install -y ca-certificates mono-runtime && rm -rf /var/lib/apt/lists/*; \
-        # The provided System.dll from Terraria doesn't match the mono version.
-        mv "${SERVER_PATH}/System.dll" /usr/lib/mono/4.5/System.dll; \
+        # Prevent version mismatch issues
+        rm "${SERVER_PATH}/System*" \
+        rm "${SERVER_PATH}/Mono*" \
+        rm "${SERVER_PATH}/monoconfig" \
+        rm "${SERVER_PATH}/mscorlib.dll" \
     fi
 
 COPY entrypoint.sh /entrypoint.sh
