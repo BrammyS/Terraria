@@ -25,7 +25,7 @@ All of the following environment variables are supported by the image entrypoint
 | `TERRARIA_MAXPLAYERS` |  |  |
 | `TERRARIA_MOTD` |  |  |
 | `TERRARIA_FORCEPRIORITY` |  |  |
-| `TERRARIA_WORLD` |  | World file path |
+| `TERRARIA_WORLD` | `/worlds` | World file path |
 | `TERRARIA_WORLDNAME` |  | Used when creating a new world |
 | `TERRARIA_AUTOCREATE` |  | `1`=small, `2`=medium, `3`=large |
 | `TERRARIA_SEED` |  | Used when creating a new world |
