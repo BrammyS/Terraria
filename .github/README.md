@@ -88,7 +88,7 @@ Create a `docker-compose.yml` like this:
 ```yaml
 services:
   terraria:
-    image: terraria:vanilla
+    image: brammys/terraria
     container_name: terraria
     restart: unless-stopped
     ports:
@@ -129,7 +129,7 @@ The image downloads the dedicated server ZIP from Terraria’s official endpoint
 Build from the `vanilla/` folder:
 
 ```bash
-docker build -t terraria:vanilla --build-arg VERSION=<VERSION> .
+docker build -t brammys/terraria --build-arg VERSION=<VERSION> .
 ```
 
 Notes:
