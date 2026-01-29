@@ -18,8 +18,8 @@ All of the following environment variables are supported by the image entrypoint
 
 | Environment variable | Default | Notes |
 |---|---|---|
-| `TERRARIA_CONFIG` | `/configs/serverconfig.txt` | Config file path |
-| `TERRARIA_PORT` |  | Publish the same port on TCP and UDP |
+| `TERRARIA_CONFIG` | `/configs/serverconfig.txt` | Specifies a configuration file to use |
+| `TERRARIA_PORT` |  | Specifies the port to listen on |
 | `TERRARIA_IP` |  | Bind IP address |
 | `TERRARIA_PASSWORD` |  | Server password (masked in logs) |
 | `TERRARIA_SECURE` | `0` | Enable by setting to `1` |
@@ -27,13 +27,13 @@ All of the following environment variables are supported by the image entrypoint
 | `TERRARIA_MAXPLAYERS` |  |  |
 | `TERRARIA_MOTD` |  |  |
 | `TERRARIA_FORCEPRIORITY` |  |  |
-| `TERRARIA_WORLD` |  | Used to override the world file path |
-| `TERRARIA_WORLDNAME` |  | Used when creating a new world |
+| `TERRARIA_WORLD` |  | Load a world and automatically start the server |
+| `TERRARIA_WORLDNAME` |  | Sets the name of the world when using -autocreate |
 | `TERRARIA_AUTOCREATE` |  | `1`=small, `2`=medium, `3`=large |
-| `TERRARIA_SEED` |  | Used when creating a new world |
+| `TERRARIA_SEED` |  | Specifies the world seed when using -autocreate |
 | `TERRARIA_BANLIST` |  |  |
 | `TERRARIA_DISABLEANNOUNCEMENTBOX` | `0` | Enable by setting to `1` |
-| `TERRARIA_ANNOUNCEMENTBOXRANGE` |  |  |
+| `TERRARIA_ANNOUNCEMENTBOXRANGE` |  | Sets the announcement box text messaging range in pixels, -1 for serverwide announcements. |
 | `TERRARIA_EXTRA_ARGS` |  | Appended verbatim to the server command |
 
 ## Volumes
