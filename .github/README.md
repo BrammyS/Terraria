@@ -28,7 +28,6 @@ All of the following environment variables are supported by the image entrypoint
 | `TERRARIA_MOTD` |  |  |
 | `TERRARIA_FORCEPRIORITY` |  |  |
 | `TERRARIA_WORLD` |  | Load a world and automatically start the server |
-| `TERRARIA_WORLDNAME` |  | Sets the name of the world when using -autocreate |
 | `TERRARIA_AUTOCREATE` |  | `1`=small, `2`=medium, `3`=large |
 | `TERRARIA_SEED` |  | Specifies the world seed when using -autocreate |
 | `TERRARIA_BANLIST` |  |  |
@@ -67,7 +66,7 @@ docker run -it --name terraria \
   -v terraria_worlds:/worlds \
   -v terraria_configs:/configs \
   -e TERRARIA_AUTOCREATE=2 \
-  -e TERRARIA_WORLDNAME=testing \
+  -e TERRARIA_WORLD=testing \
   -e TERRARIA_SEED=testing \
   brammys/terraria
 ```
@@ -79,7 +78,7 @@ docker run -it --name terraria \
   -p 7777:7777/tcp -p 7777:7777/udp \
   -v ./terraria_worlds:/worlds \
   -v ./terraria_configs:/configs \
-  -e TERRARIA_WORLD=/worlds/your_own_world.wld \
+  -e TERRARIA_WORLD=your_own_world \
   brammys/terraria
 ```
 
@@ -99,7 +98,6 @@ services:
     environment:
       # Examples (optional):
       # TERRARIA_AUTOCREATE: "2"
-      # TERRARIA_WORLDNAME: "testing"
       # TERRARIA_SEED: "testing"
       # TERRARIA_WORLD: "/worlds/testing.wld"
       # TERRARIA_MAXPLAYERS: "16"

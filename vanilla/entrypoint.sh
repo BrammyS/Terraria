@@ -24,10 +24,8 @@ apply_override "-password" "${TERRARIA_PASSWORD:-}"
 apply_override "-port" "${TERRARIA_PORT:-}"
 apply_override "-maxplayers" "${TERRARIA_MAXPLAYERS:-}"
 apply_override "-motd" "${TERRARIA_MOTD:-}"
-apply_override "-world" "${TERRARIA_WORLD:-}"
 apply_override "-autocreate" "${TERRARIA_AUTOCREATE:-}"
 apply_override "-banlist" "${TERRARIA_BANLIST:-}"
-apply_override "-worldname" "${TERRARIA_WORLDNAME:-}"
 apply_override "-ip" "${TERRARIA_IP:-}"
 apply_override "-forcepriority" "${TERRARIA_FORCEPRIORITY:-}"
 apply_override "-announcementboxrange" "${TERRARIA_ANNOUNCEMENTBOXRANGE:-}"
@@ -35,6 +33,11 @@ apply_override "-seed" "${TERRARIA_SEED:-}"
 apply_flag "-secure" "${TERRARIA_SECURE:-0}"
 apply_flag "-noupnp" "${TERRARIA_NOUPNP:-0}"
 apply_flag "-disableannouncementbox" "${TERRARIA_DISABLEANNOUNCEMENTBOX:-0}"
+
+if [ -n "${TERRARIA_WORLD:-}" ]; then
+  apply_override "-world" "${WORLD_PATH}/${TERRARIA_WORLD}.wld"
+  apply_override "-worldname" "${TERRARIA_WORLD}"
+fi
 
 # Allow for extra args for future compatibility
 if [ -n "${TERRARIA_EXTRA_ARGS:-}" ]; then
