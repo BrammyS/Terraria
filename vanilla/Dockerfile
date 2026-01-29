@@ -13,8 +13,8 @@ RUN apt-get update && apt-get install -y unzip && rm -rf /var/lib/apt/lists/*
 RUN set -eux; \
     unzip "${SERVER_PATH}.zip" -d "${SERVER_PATH}"; \
     mkdir -p "/${SERVER_PATH}"; \
-    mkdir -p "/${SERVER_PATH}/configs"; \
-    mkdir -p "/${SERVER_PATH}/worlds"; \
+    mkdir -p "/configs"; \
+    mkdir -p "/worlds"; \
     mv "${SERVER_PATH}/${VERSION}/Linux/"* "/${SERVER_PATH}/"; \
     mv "${SERVER_PATH}/${VERSION}/Windows/serverconfig.txt" "/configs/serverconfig.txt"; \
     chmod +x "${SERVER_PATH}/TerrariaServer"*
