@@ -53,10 +53,35 @@ fi
 echo "Configuring the server with the following arguments:"
 echo "$SAFE_ARGS" | xargs -n 2 echo
 
+# Trap SIGTERM and SIGINT
+shutdown_gracefully() {
+    set +e
+    echo "Shutdown request received! Sending 'exit' to Terraria..."
+    echo "exit" > /tmp/terraria_input
+    if [ -n "${SERVER_PID:-}" ]; then
+        wait "${SERVER_PID}"
+    fi
+    exit 0
+}
+trap 'shutdown_gracefully' TERM INT
+
+# Setup input pipe
+mkfifo /tmp/terraria_input
+# Keep pipe open with a sleep holding the write end
+sleep infinity > /tmp/terraria_input &
+SLEEP_PID=$!
+# Forward stdin to pipe for interactive use
+cat > /tmp/terraria_input &
+
 # Start the server
-echo "\nStarting Terraria Server..."
+echo -e "\nStarting Terraria Server..."
 if [ "${TARGETARCH:-amd64}" = "amd64" ]; then
-  exec ./TerrariaServer $ARGS
+    ./TerrariaServer $ARGS < /tmp/terraria_input &
 else
-  exec mono ./TerrariaServer.exe $ARGS
+    mono ./TerrariaServer.exe $ARGS < /tmp/terraria_input &
 fi
+SERVER_PID=$!
+
+# Wait for the server process to exit
+wait $SERVER_PID
+kill $SLEEP_PID 2>/dev/null
