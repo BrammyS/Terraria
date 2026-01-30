@@ -98,8 +98,8 @@ services:
     environment:
       # Examples (optional):
       # TERRARIA_AUTOCREATE: "2"
-      # TERRARIA_SEED: "testing"
-      # TERRARIA_WORLD: "/worlds/testing.wld"
+      # TERRARIA_SEED: "testing_123"
+      # TERRARIA_WORLD: "testing_world"
       # TERRARIA_MAXPLAYERS: "16"
       # TERRARIA_MOTD: "Welcome!"
       # TERRARIA_PASSWORD: "changeme"
