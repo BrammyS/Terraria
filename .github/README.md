@@ -42,9 +42,7 @@ The image uses the following paths for persistent data:
 - Worlds: `/worlds`
 - Configs: `/configs`
 
-The image includes a default config file at:
-
-- `/configs/serverconfig.txt`
+The image uses the config file at `/configs/serverconfig.txt` by default. It will be created automatically if it does not exist yet.`
 
 ## Examples
 
@@ -84,7 +82,7 @@ docker run -it --name terraria \
 
 ## docker-compose
 
-Create a `docker-compose.yml` like this:
+Create a `docker-compose.yml`:
 
 ```yaml
 services:
@@ -116,30 +114,44 @@ volumes:
   terraria_configs:
 ```
 
-Start it:
+The start the container:
 
 ```bash
 docker compose up -d
 ```
 
-Executing commands inside the container:
+Use the following command to attach to the running container in order to run server commands:
 
 ```bash
 docker compose attach terraria
 ```
 
-## Build
+## Updating the server
 
-The image downloads the dedicated server ZIP from Terraria’s official endpoint:
+Pull the new image and recreate the container. Your worlds and configs will be preserved if you mounted the volumes correctly.
 
-- `https://terraria.org/api/download/pc-dedicated-server/terraria-server-${VERSION}.zip`
-
-Build from the `vanilla/` folder:
-
+When running the container via `docker run`:
 ```bash
-docker build -t brammys/terraria --build-arg VERSION=<VERSION> .
+docker pull brammys/terraria:latest
+docker stop terraria
+docker rm terraria
+docker run ... (same parameters as before)
 ```
 
-Notes:
-- `<VERSION>` must match the version identifier used by the Terraria download endpoint.
-- The entrypoint chooses `./TerrariaServer` on `amd64` and `mono ./TerrariaServer.exe` on other architectures.
+When using `docker-compose`:
+```bash
+docker compose pull
+docker compose up -d
+```
+
+## Building the image locally
+
+To build the image locally, run:
+
+```bash
+git clone https://github.com/BrammyS/Terraria.git
+cd ./Terraria/vanilla
+docker build --build-arg VERSION=1452 --build-arg TARGETARCH=amd64 -t terraria:local .
+```
+
+Replace `1452` with the desired version number and `amd64` with `arm64` for ARM builds.
