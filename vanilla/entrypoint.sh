@@ -1,62 +1,118 @@
-#!/bin/sh
-set -eu
+#!/bin/bash
+set -euo pipefail
 
-# Build CLI args string
-ARGS="-config $TERRARIA_CONFIG"
+FIFO_PATH="/tmp/terraria_input"
+ARGS=("-config" "${TERRARIA_CONFIG}")
 
-apply_override() {
-  # $1 = flag
-  # $2 = value
-  if [ -n "$2" ]; then
-    ARGS="$ARGS $1 $2"
+add_param() {
+  local flag="$1"
+  local value="${2:-}"
+
+  if [[ -n "$value" ]]; then
+    ARGS+=("$flag" "$value")
   fi
 }
 
-apply_flag() {
-  # $1 = flag
-  # $2 = enabled (1/0)
-  if [ "${2:-0}" = "1" ]; then
-    ARGS="$ARGS $1"
+add_flag() {
+  local flag="$1"
+  local enabled="${2:-0}"
+
+  if [[ "$enabled" == "1" ]]; then
+    ARGS+=("$flag")
   fi
 }
 
-apply_override "-password" "${TERRARIA_PASSWORD:-}"
-apply_override "-port" "${TERRARIA_PORT:-}"
-apply_override "-maxplayers" "${TERRARIA_MAXPLAYERS:-}"
-apply_override "-motd" "${TERRARIA_MOTD:-}"
-apply_override "-autocreate" "${TERRARIA_AUTOCREATE:-}"
-apply_override "-banlist" "${TERRARIA_BANLIST:-}"
-apply_override "-ip" "${TERRARIA_IP:-}"
-apply_override "-forcepriority" "${TERRARIA_FORCEPRIORITY:-}"
-apply_override "-announcementboxrange" "${TERRARIA_ANNOUNCEMENTBOXRANGE:-}"
-apply_override "-seed" "${TERRARIA_SEED:-}"
-apply_flag "-secure" "${TERRARIA_SECURE:-0}"
-apply_flag "-noupnp" "${TERRARIA_NOUPNP:-0}"
-apply_flag "-disableannouncementbox" "${TERRARIA_DISABLEANNOUNCEMENTBOX:-0}"
+add_param "-password" "${TERRARIA_PASSWORD:-}"
+add_param "-port" "${TERRARIA_PORT:-}"
+add_param "-maxplayers" "${TERRARIA_MAXPLAYERS:-}"
+add_param "-motd" "${TERRARIA_MOTD:-}"
+add_param "-autocreate" "${TERRARIA_AUTOCREATE:-}"
+add_param "-banlist" "${TERRARIA_BANLIST:-}"
+add_param "-ip" "${TERRARIA_IP:-}"
+add_param "-forcepriority" "${TERRARIA_FORCEPRIORITY:-}"
+add_param "-announcementboxrange" "${TERRARIA_ANNOUNCEMENTBOXRANGE:-}"
+add_param "-seed" "${TERRARIA_SEED:-}"
+add_flag "-secure" "${TERRARIA_SECURE:-0}"
+add_flag "-noupnp" "${TERRARIA_NOUPNP:-0}"
+add_flag "-disableannouncementbox" "${TERRARIA_DISABLEANNOUNCEMENTBOX:-0}"
 
-if [ -n "${TERRARIA_WORLD:-}" ]; then
-  apply_override "-world" "${WORLD_PATH}/${TERRARIA_WORLD}.wld"
-  apply_override "-worldname" "${TERRARIA_WORLD}"
+if [[ -n "${TERRARIA_WORLD:-}" ]]; then
+  add_param "-world" "${WORLD_PATH}/${TERRARIA_WORLD}.wld"
+  add_param "-worldname" "${TERRARIA_WORLD}"
 fi
 
-# Allow for extra args for future compatibility
-if [ -n "${TERRARIA_EXTRA_ARGS:-}" ]; then
-  ARGS="$ARGS ${TERRARIA_EXTRA_ARGS}"
+if [[ -n "${TERRARIA_EXTRA_ARGS:-}" ]]; then
+  read -r -a EXTRA_ARGS_ARRAY <<<"${TERRARIA_EXTRA_ARGS}"
+  ARGS+=("${EXTRA_ARGS_ARRAY[@]}")
 fi
 
-# Print used config overrides
-if [ -n "${TERRARIA_PASSWORD:-}" ]; then
-    SAFE_ARGS=$(echo "$ARGS" | sed "s|$TERRARIA_PASSWORD|******|g")
-else
-    SAFE_ARGS="$ARGS"
-fi
-echo "Configuring the server with the following arguments:"
-echo "$SAFE_ARGS" | xargs -n 2 echo
+print_effective_args() {
+  local args_str="${ARGS[*]}"
+  if [ -n "${TERRARIA_PASSWORD:-}" ]; then
+      args_str=$(echo "$args_str" | sed "s|$TERRARIA_PASSWORD|******|g")
+  fi
+  echo "Configuring the server with the following arguments:"
+  echo "$args_str" | xargs -n 2 echo
+}
 
-# Start the server
-echo "\nStarting Terraria Server..."
-if [ "${TARGETARCH:-amd64}" = "amd64" ]; then
-  exec ./TerrariaServer $ARGS
-else
-  exec mono ./TerrariaServer.exe $ARGS
-fi
+setup_fifo() {
+  rm -f "$FIFO_PATH"
+  mkfifo "$FIFO_PATH"
+  chmod 666 "$FIFO_PATH"
+  sleep infinity >"$FIFO_PATH" &
+  SLEEP_PID=$!
+}
+
+shutdown_gracefully() {
+  set +e
+  echo "Shutdown request received! Stopping Terraria server gracefully..."
+
+  if [[ -n "${SERVER_PID:-}" ]] && kill -0 "${SERVER_PID}" 2>/dev/null; then
+    timeout 10s bash -c 'echo "exit" >"$1"' _ "$FIFO_PATH" || true
+    wait "${SERVER_PID}"
+  fi
+
+  kill "${SLEEP_PID:-}" 2>/dev/null
+  echo "Terraria server has stopped"
+  exit 0
+}
+
+watch_server_and_terminate_self() {
+  (
+    while kill -0 "${SERVER_PID}" 2>/dev/null; do
+      sleep 1
+    done
+    kill -TERM "$$"
+  ) &
+}
+
+start_server() {
+  echo -e "\nStarting Terraria Server..."
+
+  if [[ "${TARGETARCH:-amd64}" == "amd64" ]]; then
+    ./TerrariaServer "${ARGS[@]}" <"$FIFO_PATH" &
+  else
+    mono ./TerrariaServer.exe "${ARGS[@]}" <"$FIFO_PATH" &
+  fi
+
+  SERVER_PID=$!
+}
+
+forward_stdin_to_fifo() {
+  set +e
+  while read -r line; do
+    echo "$line" >"$FIFO_PATH"
+  done
+  set -e
+}
+
+trap 'shutdown_gracefully' SIGTERM SIGINT
+
+print_effective_args
+setup_fifo
+start_server
+watch_server_and_terminate_self
+forward_stdin_to_fifo
+
+wait "${SERVER_PID}"
+kill "${SLEEP_PID}" 2>/dev/null
