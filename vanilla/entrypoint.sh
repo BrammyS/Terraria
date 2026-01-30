@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -eu
 
 # Build CLI args string
@@ -53,25 +53,26 @@ fi
 echo "Configuring the server with the following arguments:"
 echo "$SAFE_ARGS" | xargs -n 2 echo
 
-# Trap SIGTERM and SIGINT
+# Setup input pipe
+rm -f /tmp/terraria_input
+mkfifo /tmp/terraria_input
+chmod 666 /tmp/terraria_input
+sleep infinity > /tmp/terraria_input &
+SLEEP_PID=$!
+
+# Trap exit signals from Docker
 shutdown_gracefully() {
     set +e
-    echo "Shutdown request received! Sending 'exit' to Terraria..."
+    echo "Shutdown request received! Stopping Terraria server gracefully..."
     echo "exit" > /tmp/terraria_input
     if [ -n "${SERVER_PID:-}" ]; then
         wait "${SERVER_PID}"
     fi
+    kill "${SLEEP_PID}" 2>/dev/null
+    echo "Terraria server has stopped"
     exit 0
 }
-trap 'shutdown_gracefully' TERM INT
-
-# Setup input pipe
-mkfifo /tmp/terraria_input
-# Keep pipe open with a sleep holding the write end
-sleep infinity > /tmp/terraria_input &
-SLEEP_PID=$!
-# Forward stdin to pipe for interactive use
-cat > /tmp/terraria_input &
+trap 'shutdown_gracefully' SIGTERM SIGINT
 
 # Start the server
 echo -e "\nStarting Terraria Server..."
@@ -82,6 +83,13 @@ else
 fi
 SERVER_PID=$!
 
-# Wait for the server process to exit
+# Forward stdin to pipe (blocking, so no SIGTTIN) and handle EOF
+set +e
+while read -r line; do
+    echo "$line" > /tmp/terraria_input
+done
+set -e
+
+# If input closes, wait for server
 wait $SERVER_PID
 kill $SLEEP_PID 2>/dev/null
