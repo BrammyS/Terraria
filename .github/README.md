@@ -92,6 +92,8 @@ services:
     image: brammys/terraria
     container_name: terraria
     restart: unless-stopped
+    tty: true
+    stdin_open: true
     ports:
       - "7777:7777/tcp"
       - "7777:7777/udp"
@@ -118,6 +120,12 @@ Start it:
 
 ```bash
 docker compose up -d
+```
+
+Executing commands inside the container:
+
+```bash
+docker compose attach terraria
 ```
 
 ## Build
